@@ -2,14 +2,12 @@ package com.azakordonets.web.entities;
 
 import fabricator.Fabricator;
 
-public class ResetToken {
+class ResetToken {
 
     private final String token;
-    private final String email;
-    private long timeStamp = System.currentTimeMillis();
+    private final long timeStamp = System.currentTimeMillis();
 
-    ResetToken(String email){
-        this.email = email;
+    public ResetToken(){
         this.token = Fabricator.alphaNumeric().hash(60);
     }
 

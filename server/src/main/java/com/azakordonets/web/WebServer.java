@@ -1,7 +1,8 @@
 package com.azakordonets.web;
 
+import com.azakordonets.utils.ServerProperties;
+import com.azakordonets.web.entities.TokensPool;
 import com.azakordonets.web.handlers.ResetPasswordHandler;
-import com.sun.net.httpserver.HttpServer;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -12,12 +13,16 @@ import java.net.URI;
  * Created by Andrew Zakordonets
  * Date : 12/05/2015.
  */
-public class WebServer {
+class WebServer {
 
     public static void main(String[] args) throws Exception {
-        URI baseUri = UriBuilder.fromUri("http://localhost/").port(8181).build();
+        ServerProperties props = new ServerProperties();
+        final String url = String.format("%s%s/", props.getProperty("protocol"), props.getProperty("host"));
+        final int port = props.getIntProperty("port");
+        URI baseUri = UriBuilder.fromUri(url).port(port).build();
         ResourceConfig config = new ResourceConfig().packages(ResetPasswordHandler.class.getPackage().getName());
-        HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config);
+        TokensPool.getInstance();
+        JdkHttpServerFactory.createHttpServer(baseUri, config);
     }
 
 }

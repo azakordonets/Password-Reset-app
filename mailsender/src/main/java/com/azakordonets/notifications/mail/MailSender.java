@@ -7,7 +7,10 @@ import javax.mail.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
+import com.azakordonets.utils.Config;
 
 /**
  * Created by Andrew Zakordonets.
@@ -20,11 +23,25 @@ public class MailSender {
     private final Session session;
     private final InternetAddress from;
 
+    public MailSender() throws IOException {
+        this(initProperties());
+    }
+
+    private static Properties initProperties() throws IOException {
+        Properties properties = new Properties();
+        try (InputStream classPath = MailSender.class.getResourceAsStream(Config.MAIL_PROPERTIES_FILENAME)) {
+            if (classPath != null) {
+                properties.load(classPath);
+            }
+        }
+        return properties;
+    }
+
     public MailSender(Properties mailProperties) {
         String username = mailProperties.getProperty("mail.smtp.username");
         String password = mailProperties.getProperty("mail.smtp.password");
 
-        log.info("Initializing mail transport. Username : {}. SMTP host : {}:{}",
+        log.debug("Initializing mail transport. Username : {}. SMTP host : {}:{}",
                 username, mailProperties.getProperty("mail.smtp.host"), mailProperties.getProperty("mail.smtp.port"));
 
         this.session = Session.getInstance(mailProperties, new javax.mail.Authenticator() {
@@ -45,6 +62,7 @@ public class MailSender {
                 Message message = new MimeMessage(session);
                 message.setFrom(from);
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+
                 message.setSubject(subj);
                 message.setText(body);
 
