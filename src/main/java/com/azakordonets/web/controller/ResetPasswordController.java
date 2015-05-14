@@ -8,8 +8,7 @@ import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.net.URI;
+import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -26,8 +25,9 @@ public class ResetPasswordController {
     private final int port;
     private final TokensPool tokensPool;
     private final String body;
+    private final File page;
 
-    public ResetPasswordController(String url, int port, TokensPool tokensPool) throws IOException {
+    public ResetPasswordController(String url, int port, TokensPool tokensPool) throws Exception {
         this.mailSender = new MailSender();
         this.url = url;
         this.port = port;
@@ -35,6 +35,7 @@ public class ResetPasswordController {
         URL bodyUrl = Resources.getResource("messageBody.txt");
         this.body = Resources.toString(bodyUrl, Charsets.UTF_8);
         this.tokensPool = tokensPool;
+        this.page = new File(this.getClass().getResource("/html/enterNewPassword.html").toURI());
 
     }
 
@@ -51,7 +52,7 @@ public class ResetPasswordController {
 
     }
 
-    public URI getResetPasswordRedirectUrl() throws URISyntaxException {
-        return this.getClass().getResource("/html/enterNewPassword.html").toURI();
+    public File getResetPasswordRedirectUrl() throws URISyntaxException {
+        return page;
     }
 }

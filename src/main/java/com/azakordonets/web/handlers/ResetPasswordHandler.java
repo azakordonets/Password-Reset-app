@@ -11,8 +11,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 
 @Path("/")
@@ -21,7 +19,7 @@ public class ResetPasswordHandler {
     private final ResetPasswordController resetPasswordController;
     private final TokensPool tokensPool;
 
-    public ResetPasswordHandler(String url, int port, TokensPool tokensPool) throws IOException {
+    public ResetPasswordHandler(String url, int port, TokensPool tokensPool) throws Exception {
         this.resetPasswordController = new ResetPasswordController(url, port, tokensPool);
         this.tokensPool = tokensPool;
     }
@@ -55,8 +53,7 @@ public class ResetPasswordHandler {
     @Path("landing")
     public Response test(@QueryParam("token") String token) throws URISyntaxException {
         if (tokensPool.tokenExists(token)){
-            final URI url = resetPasswordController.getResetPasswordRedirectUrl();
-            File page = new File(url);
+            File page = resetPasswordController.getResetPasswordRedirectUrl();
             return Response.ok(page).build();
 
         } else {
