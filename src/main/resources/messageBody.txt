@@ -1,0 +1,1 @@
+You have requested password reset. Please follow this link %s.
