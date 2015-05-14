@@ -42,6 +42,7 @@ public class ResetPasswordController {
     public void sendResetPasswordEmail(String email, String token) {
         User user = new User(email);
         tokensPool.addToken(token, user);
+        //todo for port 80 no need in port.
         final String resetUrl = String.format("%s:%d/landing?token=%s&email=%s", url, port, token, email);
         final String message = String.format(body, resetUrl);
         log.info("Sending token to {} address", email);
