@@ -13,42 +13,39 @@ public final class TokensPool {
 
     private static final Logger log = LogManager.getLogger(TokensPool.class);
 
-    private TokensPool() {
-    }
+    private final ConcurrentMap<String, User> holder;
 
-    private static class Holder {
-        static final ServerProperties props = new ServerProperties();
-        static final Cache<String, User> cache = CacheBuilder.newBuilder()
+    public TokensPool() {
+        ServerProperties props = new ServerProperties();
+        Cache<String, User> cache = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
                 .expireAfterWrite(props.getIntProperty("tokenExpiration"), TimeUnit.MINUTES)
                 .build();
-        static final ConcurrentMap<String, User> tokensPool = cache.asMap();
+
+        this.holder = cache.asMap();
     }
 
-    public static ConcurrentMap<String, User> getInstance() {
-        return Holder.tokensPool;
-    }
 
-    public static void addToken(String token, User user) {
+    public void addToken(String token, User user) {
         log.info("Adding token for {} user to the pool", user.getEmail());
-        if (TokensPool.tokenExists(token)) {
+        if (tokenExists(token)) {
             final User oldUser = getUser(token);
-            TokensPool.getInstance().replace(token, oldUser, user);
+            holder.replace(token, oldUser, user);
         } else {
-            TokensPool.getInstance().put(token, user);
+            holder.put(token, user);
         }
     }
 
-    public static User getUser(String token) {
-        return TokensPool.getInstance().get(token);
+    public User getUser(String token) {
+        return holder.get(token);
     }
 
-    public static void removeToken(String token) {
-        TokensPool.getInstance().remove(token);
+    public void removeToken(String token) {
+        holder.remove(token);
     }
 
-    public static boolean tokenExists(String token) {
-        return TokensPool.getInstance().containsKey(token);
+    public boolean tokenExists(String token) {
+        return holder.containsKey(token);
     }
 
 }

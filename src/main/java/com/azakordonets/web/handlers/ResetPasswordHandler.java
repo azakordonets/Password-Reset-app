@@ -18,10 +18,12 @@ import java.net.URISyntaxException;
 @Path("/")
 public class ResetPasswordHandler {
 
-    private ResetPasswordController resetPasswordController;
+    private final ResetPasswordController resetPasswordController;
+    private final TokensPool tokensPool;
 
-    public ResetPasswordHandler() throws IOException {
-        this.resetPasswordController = new ResetPasswordController();
+    public ResetPasswordHandler(String url, int port, TokensPool tokensPool) throws IOException {
+        this.resetPasswordController = new ResetPasswordController(url, port, tokensPool);
+        this.tokensPool = tokensPool;
     }
 
     @POST
@@ -52,7 +54,7 @@ public class ResetPasswordHandler {
     @Produces(value = MediaType.TEXT_HTML)
     @Path("landing")
     public Response test(@QueryParam("token") String token) throws URISyntaxException {
-        if (TokensPool.tokenExists(token)){
+        if (tokensPool.tokenExists(token)){
             final URI url = resetPasswordController.getResetPasswordRedirectUrl();
             File page = new File(url);
             return Response.ok(page).build();
@@ -70,13 +72,13 @@ public class ResetPasswordHandler {
         final String token = formParams.getFirst("token");
         final String password = formParams.getFirst("password");
         final String email = formParams.getFirst("email");
-        final User user = TokensPool.getUser(token);
+        final User user = tokensPool.getUser(token);
         if (user == null) {
             return notFoundResponse(String.format("User with token=%s was not found", token));
         }
         final String hashedPassword = SHA256Util.makeHash(password, user.getEmail());
         resetPasswordController.invoke(token, hashedPassword, email);
-        TokensPool.removeToken(token);
+        tokensPool.removeToken(token);
         return Response.ok().build();
     }
 

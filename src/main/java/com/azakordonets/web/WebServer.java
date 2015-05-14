@@ -1,6 +1,6 @@
 package com.azakordonets.web;
 
-import com.azakordonets.utils.ServerProperties;
+import com.azakordonets.utils.ParseUtil;
 import com.azakordonets.web.entities.TokensPool;
 import com.azakordonets.web.handlers.ResetPasswordHandler;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
@@ -13,14 +13,14 @@ import java.net.URI;
  * Created by Andrew Zakordonets
  * Date : 12/05/2015.
  */
-class WebServer {
+public class WebServer {
 
     public static void main(String[] args) throws Exception {
-        ServerProperties props = new ServerProperties();
-        final String url = String.format("%s%s/", props.getProperty("protocol"), props.getProperty("host"));
-        URI baseUri = UriBuilder.fromUri(url).port(8181).build();
-        ResourceConfig config = new ResourceConfig().packages(ResetPasswordHandler.class.getPackage().getName());
-        TokensPool.getInstance();
+        String url = args[0];
+        int port = ParseUtil.parseInt(args[1]);
+
+        URI baseUri = UriBuilder.fromUri(url).port(port).build();
+        ResourceConfig config = new ResourceConfig().register(new ResetPasswordHandler(url, port, new TokensPool()));
         JdkHttpServerFactory.createHttpServer(baseUri, config);
     }
 

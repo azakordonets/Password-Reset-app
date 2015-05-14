@@ -8,10 +8,6 @@ import java.util.Properties;
 
 public class ServerProperties extends Properties {
 
-    public ServerProperties() {
-        initProperties(Config.SERVER_PROPERTIES_FILENAME);
-    }
-
     private static Path getFileInCurrentDir(String filename) {
         return Paths.get(System.getProperty("user.dir"), filename);
     }

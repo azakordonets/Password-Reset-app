@@ -1,6 +1,6 @@
 package com.azakordonets.utils;
 
-final class ParseUtil {
+public final class ParseUtil {
 
     public static int parseInt(String intProperty) {
         try {

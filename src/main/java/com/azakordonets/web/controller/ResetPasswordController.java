@@ -1,12 +1,10 @@
 package com.azakordonets.web.controller;
 
 import com.azakordonets.mail.MailSender;
-import com.azakordonets.utils.ServerProperties;
 import com.azakordonets.web.entities.TokensPool;
 import com.azakordonets.web.entities.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,20 +19,21 @@ public class ResetPasswordController {
 
     private static final Logger log = LogManager.getLogger(ResetPasswordController.class);
     private final MailSender mailSender;
-    private String protocol;
-    private String host;
+    private final String url;
+    private final int port;
+    private final TokensPool tokensPool;
 
-    public ResetPasswordController() throws IOException {
+    public ResetPasswordController(String url, int port, TokensPool tokensPool) throws IOException {
         this.mailSender = new MailSender();
-        ServerProperties props = new ServerProperties();
-        protocol = props.getProperty("protocol");
-        host = props.getProperty("host");
+        this.url = url;
+        this.port = port;
+        this.tokensPool = tokensPool;
     }
 
     public void sendResetPasswordEmail(String email, String token) {
         User user = new User(email);
-        TokensPool.addToken(token, user);
-        final String resetUrl = String.format("%s%s:8181/landing?token=%s&email=%s", protocol, host, token, email);
+        tokensPool.addToken(token, user);
+        final String resetUrl = String.format("%s:%d/landing?token=%s&email=%s", url, port, token, email);
         final String message = String.format("You have requested password reset. Please folow this link %s", resetUrl);
         log.info("Sending token to {} address", email);
         mailSender.produceSendMailTask(email, "Password reset request", message).run();
