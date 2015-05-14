@@ -28,12 +28,7 @@ public final class TokensPool {
 
     public void addToken(String token, User user) {
         log.info("Adding token for {} user to the pool", user.getEmail());
-        if (tokenExists(token)) {
-            final User oldUser = getUser(token);
-            holder.replace(token, oldUser, user);
-        } else {
-            holder.put(token, user);
-        }
+        holder.put(token, user);
     }
 
     public User getUser(String token) {
@@ -42,10 +37,6 @@ public final class TokensPool {
 
     public void removeToken(String token) {
         holder.remove(token);
-    }
-
-    public boolean tokenExists(String token) {
-        return holder.containsKey(token);
     }
 
 }
