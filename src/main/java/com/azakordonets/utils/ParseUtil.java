@@ -9,13 +9,4 @@ final class ParseUtil {
             throw new RuntimeException(intProperty + " not a number. " + nfe.getMessage());
         }
     }
-
-    public static long parseLong(String longProperty) {
-        try {
-            return Integer.parseInt(longProperty);
-        } catch (NumberFormatException nfe) {
-            throw new RuntimeException(longProperty + " not a number. " + nfe.getMessage());
-        }
-    }
-
 }

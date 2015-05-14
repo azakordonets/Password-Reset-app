@@ -18,8 +18,7 @@ class WebServer {
     public static void main(String[] args) throws Exception {
         ServerProperties props = new ServerProperties();
         final String url = String.format("%s%s/", props.getProperty("protocol"), props.getProperty("host"));
-        final int port = props.getIntProperty("port");
-        URI baseUri = UriBuilder.fromUri(url).port(port).build();
+        URI baseUri = UriBuilder.fromUri(url).port(8181).build();
         ResourceConfig config = new ResourceConfig().packages(ResetPasswordHandler.class.getPackage().getName());
         TokensPool.getInstance();
         JdkHttpServerFactory.createHttpServer(baseUri, config);
