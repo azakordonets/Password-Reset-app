@@ -11,13 +11,13 @@ import java.util.concurrent.TimeUnit;
 public final class TokensPool {
 
     private static final Logger log = LogManager.getLogger(TokensPool.class);
-
+    private static final int TOKEN_EXPIRATION_DEFAULT_PERIOD_IN_MIN = 60;
     private final ConcurrentMap<String, User> holder;
 
     public TokensPool() {
         Cache<String, User> cache = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
-                .expireAfterWrite(60, TimeUnit.MINUTES)
+                .expireAfterWrite(TOKEN_EXPIRATION_DEFAULT_PERIOD_IN_MIN, TimeUnit.MINUTES)
                 .build();
 
         this.holder = cache.asMap();
