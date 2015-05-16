@@ -53,7 +53,7 @@ public class ResetPasswordHandler {
     @Path("landing")
     public Response test(@QueryParam("token") String token) throws URISyntaxException {
         if (tokensPool.tokenExists(token)){
-            File page = resetPasswordController.getResetPasswordRedirectUrl();
+            File page = resetPasswordController.getResetPasswordPage();
             return Response.ok(page).build();
 
         } else {
@@ -65,10 +65,9 @@ public class ResetPasswordHandler {
     @Consumes(value = MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(value = MediaType.APPLICATION_JSON)
     @Path("updatePassword")
-    public Response updatePassword(MultivaluedMap<String, String> formParams) {
-        final String token = formParams.getFirst("token");
-        final String password = formParams.getFirst("password");
-        final String email = formParams.getFirst("email");
+    public Response updatePassword(@FormParam("password") String password,
+                                   @FormParam("token") String token,
+                                   @FormParam("email") String email) {
         final User user = tokensPool.getUser(token);
         if (user == null) {
             return notFoundResponse(String.format("User with token=%s was not found", token));

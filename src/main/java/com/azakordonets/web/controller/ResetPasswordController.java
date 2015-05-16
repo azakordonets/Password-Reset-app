@@ -28,7 +28,11 @@ public class ResetPasswordController {
     private final File page;
 
     public ResetPasswordController(String url, int port, TokensPool tokensPool) throws Exception {
-        this.mailSender = new MailSender();
+        this(url, port, tokensPool, new MailSender());
+    }
+
+    public ResetPasswordController(String url, int port, TokensPool tokensPool, MailSender mailSender) throws Exception {
+        this.mailSender = mailSender;
         this.url = url;
         this.port = port;
 
@@ -53,7 +57,7 @@ public class ResetPasswordController {
 
     }
 
-    public File getResetPasswordRedirectUrl() throws URISyntaxException {
+    public File getResetPasswordPage() {
         return page;
     }
 }

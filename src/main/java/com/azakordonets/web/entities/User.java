@@ -15,4 +15,19 @@ public class User {
         return email;
     }
 
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
+
+    public long getResetPasswordTokenTs() {
+        return resetPasswordTokenTs;
+    }
+
+    public void setResetPasswordTokenTs(long resetPasswordTokenTs) {
+        this.resetPasswordTokenTs = resetPasswordTokenTs;
+    }
 }

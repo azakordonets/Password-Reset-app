@@ -1,6 +1,5 @@
 package com.azakordonets.web.entities;
 
-import com.azakordonets.utils.ServerProperties;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -16,10 +15,9 @@ public final class TokensPool {
     private final ConcurrentMap<String, User> holder;
 
     public TokensPool() {
-        ServerProperties props = new ServerProperties();
         Cache<String, User> cache = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
-                .expireAfterWrite(props.getIntProperty("tokenExpiration"), TimeUnit.MINUTES)
+                .expireAfterWrite(60, TimeUnit.MINUTES)
                 .build();
 
         this.holder = cache.asMap();
@@ -41,6 +39,10 @@ public final class TokensPool {
 
     public boolean tokenExists(String token) {
         return holder.containsKey(token);
+    }
+
+    public int size() {
+        return holder.size();
     }
 
 }

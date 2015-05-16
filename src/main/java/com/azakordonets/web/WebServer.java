@@ -13,13 +13,13 @@ import java.net.URI;
  * Created by Andrew Zakordonets
  * Date : 12/05/2015.
  */
-public class WebServer {
+class WebServer {
 
     public static void main(String[] args) throws Exception {
-        String url = args[0];
-        int port = ParseUtil.parseInt(args[1]);
-
-        URI baseUri = UriBuilder.fromUri(url).port(port).build();
+        args = (args.length == 0 ? new String[]{"localhost", "8083"} : args);
+        String url = String.format("http://%s", args[0] == null ? "localhost" : args[0]);
+        int port = ParseUtil.parseInt(args[1] == null ? "80" : args[1]);
+        URI baseUri = UriBuilder.fromUri(url + "/").port(port).build();
         ResourceConfig config = new ResourceConfig().register(new ResetPasswordHandler(url, port, new TokensPool()));
         JdkHttpServerFactory.createHttpServer(baseUri, config);
     }
