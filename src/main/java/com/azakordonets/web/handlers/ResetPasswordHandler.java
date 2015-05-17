@@ -8,6 +8,8 @@ import fabricator.Fabricator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -34,7 +36,7 @@ public class ResetPasswordHandler {
         if (email == null || email.isEmpty()) {
             return badRequestResponse("Email field is empty. Please input your email.");
         } else if (!isValid(email)) {
-            return badRequestResponse("Email has not valid format.");
+            return badRequestResponse(String.format("%s email has not valid format.", email));
         } else {
             String token = Fabricator.alphaNumeric().hash(60);
             log.info("{} trying to reset pass.", email);
@@ -49,9 +51,16 @@ public class ResetPasswordHandler {
         }
     }
 
-    //todo email validation should be added.
     private boolean isValid(String email) {
-        return true;
+        boolean isValid = false;
+        try {
+            InternetAddress internetAddress = new InternetAddress(email);
+            internetAddress.validate();
+            isValid = true;
+        } catch (AddressException e) {
+            log.error("{} is invalid e-mail address" + email);
+        }
+        return isValid;
     }
 
 
