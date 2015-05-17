@@ -9,8 +9,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.net.URISyntaxException;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 
 /**
  * Created by Andrew Zakordonets
@@ -25,7 +27,7 @@ public class ResetPasswordController {
     private final int port;
     private final TokensPool tokensPool;
     private final String body;
-    private final File page;
+    private final String pageContent;
 
     public ResetPasswordController(String url, int port, TokensPool tokensPool) throws Exception {
         this(url, port, tokensPool, new MailSender());
@@ -39,15 +41,20 @@ public class ResetPasswordController {
         URL bodyUrl = Resources.getResource("messageBody.txt");
         this.body = Resources.toString(bodyUrl, Charsets.UTF_8);
         this.tokensPool = tokensPool;
-        this.page = new File(this.getClass().getResource("/html/enterNewPassword.html").toURI());
+        File page = new File(this.getClass().getResource("/html/enterNewPassword.html").toURI());
+        this.pageContent = readFile(page, Charset.forName("UTF-8"));
+    }
 
+    private static String readFile(File file, Charset encoding) throws IOException {
+        byte[] encoded = Files.readAllBytes(file.toPath());
+        return new String(encoded, encoding);
     }
 
     public void sendResetPasswordEmail(String email, String token) {
         User user = new User(email);
         tokensPool.addToken(token, user);
         //todo for port 80 no need in port.
-        final String resetUrl = String.format("%s:%d/landing?token=%s&email=%s", url, port, token, email);
+        final String resetUrl = String.format("%s:%d/landing?token=%s", url, port, token);
         final String message = String.format(body, resetUrl);
         log.info("Sending token to {} address", email);
         mailSender.produceSendMailTask(email, "Password reset request", message).run();
@@ -57,7 +64,7 @@ public class ResetPasswordController {
 
     }
 
-    public File getResetPasswordPage() {
-        return page;
+    public String getResetPasswordPage(String email) {
+        return pageContent.replace("{EMAIL}", email);
     }
 }

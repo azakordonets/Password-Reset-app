@@ -9,7 +9,6 @@ import fabricator.Fabricator;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.File;
 import java.net.URISyntaxException;
 
 @Path("/")
@@ -55,8 +54,9 @@ public class ResetPasswordHandler {
     @Produces(value = MediaType.TEXT_HTML)
     @Path("landing")
     public Response test(@QueryParam("token") String token) throws URISyntaxException {
-        if (tokensPool.tokenExists(token)){
-            File page = resetPasswordController.getResetPasswordPage();
+        User user = tokensPool.getUser(token);
+        if (user != null) {
+            String page = resetPasswordController.getResetPasswordPage(user.getEmail());
             return Response.ok(page).build();
 
         } else {

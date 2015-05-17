@@ -37,10 +37,6 @@ public final class TokensPool {
         holder.remove(token);
     }
 
-    public boolean tokenExists(String token) {
-        return holder.containsKey(token);
-    }
-
     public int size() {
         return holder.size();
     }
