@@ -82,7 +82,7 @@ public class ResetPasswordHandler {
                                    @FormParam("email") String email) {
         final User user = tokensPool.getUser(token);
         if (user == null) {
-            return notFoundResponse(String.format("Invalid token. Please repeat all steps.", token));
+            return notFoundResponse("Invalid token. Please repeat all steps.");
         }
         final String hashedPassword = SHA256Util.makeHash(password, user.getEmail());
         resetPasswordController.invoke(token, hashedPassword, email);
