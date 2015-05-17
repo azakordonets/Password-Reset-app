@@ -8,7 +8,6 @@ import fabricator.Fabricator;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.net.URISyntaxException;
@@ -27,18 +26,22 @@ public class ResetPasswordHandler {
     @POST
     @Consumes(value = MediaType.APPLICATION_FORM_URLENCODED)
     @Path("resetPassword")
-    public Response sendResetPasswordEmail(MultivaluedMap<String, String> params) {
-        if (!params.containsKey("user")) {
-            return badRequestResponse("User param is missing");
-        }
-        final String email = params.getFirst("user");
-        final String token = Fabricator.alphaNumeric().hash(60);
+    public Response sendResetPasswordEmail(@FormParam("email") String email) {
+
         if (email == null || email.isEmpty()) {
-            return badRequestResponse("Email cannot be empty");
+            return badRequestResponse("Email field is empty. Please input your email.");
+        } else if (!isValid(email)) {
+            return badRequestResponse("Email has not valid format.");
         } else {
+            String token = Fabricator.alphaNumeric().hash(60);
             resetPasswordController.sendResetPasswordEmail(email, token);
             return Response.ok().entity("Email was sent").build();
         }
+    }
+
+    //todo email validation should be added.
+    private boolean isValid(String email) {
+        return true;
     }
 
 
