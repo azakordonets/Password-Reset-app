@@ -5,6 +5,8 @@ import com.azakordonets.web.controller.ResetPasswordController;
 import com.azakordonets.web.entities.TokensPool;
 import com.azakordonets.web.entities.User;
 import fabricator.Fabricator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -14,6 +16,8 @@ import java.net.URISyntaxException;
 
 @Path("/")
 public class ResetPasswordHandler {
+
+    private static final Logger log = LogManager.getLogger(ResetPasswordHandler.class);
 
     private final ResetPasswordController resetPasswordController;
     private final TokensPool tokensPool;
@@ -27,14 +31,16 @@ public class ResetPasswordHandler {
     @Consumes(value = MediaType.APPLICATION_FORM_URLENCODED)
     @Path("resetPassword")
     public Response sendResetPasswordEmail(@FormParam("email") String email) {
-
         if (email == null || email.isEmpty()) {
             return badRequestResponse("Email field is empty. Please input your email.");
         } else if (!isValid(email)) {
             return badRequestResponse("Email has not valid format.");
         } else {
             String token = Fabricator.alphaNumeric().hash(60);
+            log.info("{} trying to reset pass.", email);
+            //todo sending mail could fail. so you should return 500 with message explaning problem
             resetPasswordController.sendResetPasswordEmail(email, token);
+            log.info("{} mail sent.", email);
             return Response.ok().entity("Email was sent").build();
         }
     }
@@ -57,6 +63,7 @@ public class ResetPasswordHandler {
     public Response generateResetPage(@QueryParam("token") String token) throws URISyntaxException {
         User user = tokensPool.getUser(token);
         if (user != null) {
+            log.info("{} landed.", user.getEmail());
             String page = resetPasswordController.getResetPasswordPage(user.getEmail(), token);
             return Response.ok(page).build();
 
@@ -86,6 +93,7 @@ public class ResetPasswordHandler {
         }
         final String hashedPassword = SHA256Util.makeHash(password, user.getEmail());
         resetPasswordController.invoke(token, hashedPassword, email);
+        log.info("{} password was reset.", user.getEmail());
         tokensPool.removeToken(token);
         return Response.ok().build();
     }

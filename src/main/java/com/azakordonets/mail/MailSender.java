@@ -1,16 +1,19 @@
 package com.azakordonets.mail;
 
+import com.azakordonets.utils.Config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.mail.*;
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import com.azakordonets.utils.Config;
 
 /**
  * Created by Andrew Zakordonets.
@@ -25,16 +28,6 @@ public class MailSender {
 
     public MailSender() throws IOException {
         this(initProperties());
-    }
-
-    private static Properties initProperties() throws IOException {
-        Properties properties = new Properties();
-        try (InputStream classPath = MailSender.class.getResourceAsStream(Config.MAIL_PROPERTIES_FILENAME)) {
-            if (classPath != null) {
-                properties.load(classPath);
-            }
-        }
-        return properties;
     }
 
     public MailSender(Properties mailProperties) {
@@ -56,6 +49,16 @@ public class MailSender {
         }
     }
 
+    private static Properties initProperties() throws IOException {
+        Properties properties = new Properties();
+        try (InputStream classPath = MailSender.class.getResourceAsStream(Config.MAIL_PROPERTIES_FILENAME)) {
+            if (classPath != null) {
+                properties.load(classPath);
+            }
+        }
+        return properties;
+    }
+
     public Runnable produceSendMailTask(String to, String subj, String body) {
         return () -> {
             try {
@@ -68,7 +71,7 @@ public class MailSender {
 
                 Transport.send(message);
                 log.trace("Mail to {} was sent. Subj : {}, body : {}", to, subj, body);
-            } catch (MessagingException e) {
+            } catch (Exception e) {
                 log.error("Error sending mail to {}. Reason : {}", to, e.getMessage());
             }
         };
