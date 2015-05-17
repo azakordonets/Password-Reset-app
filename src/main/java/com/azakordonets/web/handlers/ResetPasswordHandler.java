@@ -38,8 +38,12 @@ public class ResetPasswordHandler {
         } else {
             String token = Fabricator.alphaNumeric().hash(60);
             log.info("{} trying to reset pass.", email);
-            //todo sending mail could fail. so you should return 500 with message explaning problem
-            resetPasswordController.sendResetPasswordEmail(email, token);
+            try {
+                resetPasswordController.sendResetPasswordEmail(email, token);
+            } catch (Exception e) {
+                log.info("Error sending mail for {}", email);
+                return badRequestResponse("Error sending reset email.");
+            }
             log.info("{} mail sent.", email);
             return Response.ok().entity("Email was sent").build();
         }

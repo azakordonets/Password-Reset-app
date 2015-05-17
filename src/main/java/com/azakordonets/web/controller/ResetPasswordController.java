@@ -50,14 +50,14 @@ public class ResetPasswordController {
         return new String(encoded, encoding);
     }
 
-    public void sendResetPasswordEmail(String email, String token) {
+    public void sendResetPasswordEmail(String email, String token) throws Exception {
         User user = new User(email);
         tokensPool.addToken(token, user);
         //todo for port 80 no need in port.
         final String resetUrl = String.format("%s:%d/landing?token=%s", url, port, token);
         final String message = String.format(body, resetUrl);
         log.info("Sending token to {} address", email);
-        mailSender.produceSendMailTask(email, "Password reset request", message).run();
+        mailSender.produceSendMailTask(email, "Password reset request", message);
     }
 
     public void invoke(String token, String password, String email) {
