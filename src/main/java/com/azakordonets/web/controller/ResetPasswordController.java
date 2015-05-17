@@ -64,7 +64,7 @@ public class ResetPasswordController {
 
     }
 
-    public String getResetPasswordPage(String email) {
-        return pageContent.replace("{EMAIL}", email);
+    public String getResetPasswordPage(String email, String token) {
+        return pageContent.replace("{EMAIL}", email).replace("{TOKEN}", token);
     }
 }

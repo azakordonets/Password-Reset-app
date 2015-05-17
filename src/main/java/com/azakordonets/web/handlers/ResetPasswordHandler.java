@@ -9,6 +9,7 @@ import fabricator.Fabricator;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
 import java.net.URISyntaxException;
 
 @Path("/")
@@ -53,16 +54,24 @@ public class ResetPasswordHandler {
     @GET
     @Produces(value = MediaType.TEXT_HTML)
     @Path("landing")
-    public Response test(@QueryParam("token") String token) throws URISyntaxException {
+    public Response generateResetPage(@QueryParam("token") String token) throws URISyntaxException {
         User user = tokensPool.getUser(token);
         if (user != null) {
-            String page = resetPasswordController.getResetPasswordPage(user.getEmail());
+            String page = resetPasswordController.getResetPasswordPage(user.getEmail(), token);
             return Response.ok(page).build();
 
         } else {
             return notFoundResponse(String.format("%s token was not found or it is outdated", token));
         }
     }
+
+    @GET
+    @Path("static/{filename}")
+    public Response getStatic(@PathParam("filename") String filename) throws URISyntaxException {
+        File file = new File(this.getClass().getResource("/html/" + filename).toURI());
+        return Response.ok(file).build();
+    }
+
 
     @POST
     @Consumes(value = MediaType.APPLICATION_FORM_URLENCODED)
@@ -73,7 +82,7 @@ public class ResetPasswordHandler {
                                    @FormParam("email") String email) {
         final User user = tokensPool.getUser(token);
         if (user == null) {
-            return notFoundResponse(String.format("User with token=%s was not found", token));
+            return notFoundResponse(String.format("Invalid token. Please repeat all steps.", token));
         }
         final String hashedPassword = SHA256Util.makeHash(password, user.getEmail());
         resetPasswordController.invoke(token, hashedPassword, email);
