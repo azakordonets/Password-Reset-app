@@ -65,7 +65,7 @@ public class MailSender {
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
 
         message.setSubject(subj);
-        message.setText(body);
+        message.setContent(body, "text/html");
 
         Transport.send(message);
         log.debug("Mail to {} was sent. Subj : {}, body : {}", to, subj, body);

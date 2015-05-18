@@ -38,7 +38,7 @@ public class ResetPasswordController {
         this.url = url;
         this.port = port;
 
-        URL bodyUrl = Resources.getResource("messageBody.txt");
+        URL bodyUrl = Resources.getResource("html/message.html");
         this.body = Resources.toString(bodyUrl, Charsets.UTF_8);
         this.tokensPool = tokensPool;
         File page = new File(this.getClass().getResource("/html/enterNewPassword.html").toURI());
@@ -54,7 +54,7 @@ public class ResetPasswordController {
         User user = new User(email);
         tokensPool.addToken(token, user);
         final String resetUrl = String.format("%s%s/landing?token=%s", url, (port == 80) ? "" : ":" + port, token);
-        final String message = String.format(body, resetUrl);
+        final String message = body.replace("{RESET_URL}", resetUrl);
         log.info("Sending token to {} address", email);
         mailSender.produceSendMailTask(email, "Password reset request", message);
     }
