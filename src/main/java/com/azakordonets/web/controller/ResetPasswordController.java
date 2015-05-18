@@ -38,7 +38,7 @@ public class ResetPasswordController {
         this.url = url;
         this.port = port;
 
-        URL bodyUrl = Resources.getResource("html/message.html");
+        URL bodyUrl = Resources.getResource("body/message.html");
         this.body = Resources.toString(bodyUrl, Charsets.UTF_8);
         this.tokensPool = tokensPool;
         File page = new File(this.getClass().getResource("/html/enterNewPassword.html").toURI());

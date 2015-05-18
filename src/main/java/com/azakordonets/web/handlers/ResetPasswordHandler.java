@@ -9,8 +9,6 @@ import fabricator.Fabricator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -36,20 +34,22 @@ public class ResetPasswordHandler {
     public Response sendResetPasswordEmail(@FormParam("email") String email) {
         if (email == null || email.isEmpty()) {
             return badRequestResponse("Email field is empty. Please input your email.");
-        } else if (!EmailValidator.isValid(email)) {
-            return badRequestResponse(String.format("%s email has not valid format.", email));
-        } else {
-            String token = Fabricator.alphaNumeric().hash(60);
-            log.info("{} trying to reset pass.", email);
-            try {
-                resetPasswordController.sendResetPasswordEmail(email, token);
-            } catch (Exception e) {
-                log.info("Error sending mail for {}", email);
-                return badRequestResponse("Error sending reset email.");
-            }
-            log.info("{} mail sent.", email);
-            return Response.ok().entity("Email was sent").build();
         }
+
+        if (!EmailValidator.isValid(email)) {
+            return badRequestResponse(String.format("%s email has not valid format.", email));
+        }
+
+        String token = Fabricator.alphaNumeric().hash(60);
+        log.info("{} trying to reset pass.", email);
+        try {
+            resetPasswordController.sendResetPasswordEmail(email, token);
+        } catch (Exception e) {
+            log.info("Error sending mail for {}", email);
+            return badRequestResponse("Error sending reset email.");
+        }
+        log.info("{} mail sent.", email);
+        return Response.ok().entity("Email was sent").build();
     }
 
     private Response badRequestResponse(String message) {
@@ -63,14 +63,13 @@ public class ResetPasswordHandler {
     @Path("landing")
     public Response generateResetPage(@QueryParam("token") String token) throws URISyntaxException {
         User user = tokensPool.getUser(token);
-        if (user != null) {
-            log.info("{} landed.", user.getEmail());
-            String page = resetPasswordController.getResetPasswordPage(user.getEmail(), token);
-            return Response.ok(page).build();
-
-        } else {
+        if (user == null) {
             return notFoundResponse(String.format("%s token was not found or it is outdated", token));
         }
+
+        log.info("{} landed.", user.getEmail());
+        String page = resetPasswordController.getResetPasswordPage(user.getEmail(), token);
+        return Response.ok(page).build();
     }
 
     @GET
@@ -86,14 +85,13 @@ public class ResetPasswordHandler {
     @Produces(value = MediaType.APPLICATION_JSON)
     @Path("updatePassword")
     public Response updatePassword(@FormParam("password") String password,
-                                   @FormParam("token") String token,
-                                   @FormParam("email") String email) {
-        final User user = tokensPool.getUser(token);
+                                   @FormParam("token") String token) {
+        User user = tokensPool.getUser(token);
         if (user == null) {
             return notFoundResponse("Invalid token. Please repeat all steps.");
         }
-        final String hashedPassword = SHA256Util.makeHash(password, user.getEmail());
-        resetPasswordController.invoke(token, hashedPassword, email);
+        String hashedPassword = SHA256Util.makeHash(password, user.getEmail());
+        resetPasswordController.invoke(token, hashedPassword, user.getEmail());
         log.info("{} password was reset.", user.getEmail());
         tokensPool.removeToken(token);
         return Response.ok().build();
