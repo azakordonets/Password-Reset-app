@@ -1,7 +1,6 @@
 package com.azakordonets.web.handlers;
 
 import com.azakordonets.utils.EmailValidator;
-import com.azakordonets.utils.SHA256Util;
 import com.azakordonets.web.controller.ResetPasswordController;
 import com.azakordonets.web.entities.TokensPool;
 import com.azakordonets.web.entities.User;
@@ -90,8 +89,8 @@ public class ResetPasswordHandler {
         if (user == null) {
             return notFoundResponse("Invalid token. Please repeat all steps.");
         }
-        String hashedPassword = SHA256Util.makeHash(password, user.getEmail());
-        resetPasswordController.invoke(token, hashedPassword, user.getEmail());
+        //String hashedPassword = SHA256Util.makeHash(password, user.getEmail());
+        resetPasswordController.invoke(token, password, user.getEmail());
         log.info("{} password was reset.", user.getEmail());
         tokensPool.removeToken(token);
         return Response.ok().build();
