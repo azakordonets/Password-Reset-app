@@ -1,5 +1,6 @@
 package com.azakordonets.web.handlers;
 
+import com.azakordonets.utils.EmailValidator;
 import com.azakordonets.utils.SHA256Util;
 import com.azakordonets.web.controller.ResetPasswordController;
 import com.azakordonets.web.entities.TokensPool;
@@ -35,7 +36,7 @@ public class ResetPasswordHandler {
     public Response sendResetPasswordEmail(@FormParam("email") String email) {
         if (email == null || email.isEmpty()) {
             return badRequestResponse("Email field is empty. Please input your email.");
-        } else if (!isValid(email)) {
+        } else if (!EmailValidator.isValid(email)) {
             return badRequestResponse(String.format("%s email has not valid format.", email));
         } else {
             String token = Fabricator.alphaNumeric().hash(60);
@@ -50,19 +51,6 @@ public class ResetPasswordHandler {
             return Response.ok().entity("Email was sent").build();
         }
     }
-
-    private boolean isValid(String email) {
-        boolean isValid = false;
-        try {
-            InternetAddress internetAddress = new InternetAddress(email);
-            internetAddress.validate();
-            isValid = true;
-        } catch (AddressException e) {
-            log.error("{} is invalid e-mail address" + email);
-        }
-        return isValid;
-    }
-
 
     private Response badRequestResponse(String message) {
         return Response.status(Response.Status.BAD_REQUEST)
